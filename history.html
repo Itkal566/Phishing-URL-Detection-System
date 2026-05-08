@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Scan History</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+padding:12px;
+border-bottom:1px solid #ddd;
+text-align:left;
+}
+
+th{
+background:#1e3a8a;
+color:white;
+}
+
+.safe{
+color:green;
+font-weight:600;
+}
+
+.phishing{
+color:red;
+font-weight:600;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+<div>SecureGuard</div>
+<div class="nav-links">
+  <a href="/home">Home</a>
+  <a href="/logout">Logout</a>
+</div>
+</header>
+
+<section class="hero">
+
+<h1>Your Scan History</h1>
+
+<div class="main-card">
+
+<table>
+
+<tr>
+<th>URL</th>
+<th>Result</th>
+<th>Time</th>
+</tr>
+
+{% for row in data %}
+
+<tr>
+
+<td>{{row[0]}}</td>
+
+{% if "Safe" in row[1] %}
+<td class="safe">{{row[1]}}</td>
+{% else %}
+<td class="phishing">{{row[1]}}</td>
+{% endif %}
+
+<td>{{row[2]}}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<br>
+
+<a href="/home">
+<button>Scan Another URL</button>
+</a>
+<a href="/download_history" style="margin-left: 10px;">
+<button style="background: #10b981;">Export to CSV</button>
+</a>
+
+</div>
+
+</section>
+
+<footer>
+© 2026 Phishing URL Detection Project
+</footer>
+
+</body>
+</html>

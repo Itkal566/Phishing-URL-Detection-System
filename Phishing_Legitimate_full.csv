@@ -1,0 +1,153 @@
+from flask import Flask, render_template, request, redirect, session, Response
+from werkzeug.security import generate_password_hash, check_password_hash
+import psycopg2
+import pickle
+import requests
+import io
+import csv
+from features import extract_features
+
+app = Flask(__name__)
+app.secret_key = "secret123"
+
+model = pickle.load(open("model.pkl","rb"))
+
+conn = psycopg2.connect(
+database="phishing",
+user="postgres",
+password="pratik",
+host="localhost",
+port="5432"
+)
+
+cursor = conn.cursor()
+
+@app.route("/")
+def login():
+    return render_template("login.html")
+
+@app.route("/signup")
+def signup():
+    return render_template("signup.html")
+
+
+@app.route("/register", methods=["POST"])
+def register():
+
+    username = request.form["username"]
+    email = request.form["email"]
+    password = request.form["password"]
+
+    hashed_pw = generate_password_hash(password)
+
+    cursor.execute("INSERT INTO users(username,email,password) VALUES(%s,%s,%s)",(username,email,hashed_pw))
+    conn.commit()
+
+    return redirect("/")
+
+@app.route("/login", methods=["POST"])
+def login_user():
+
+    email = request.form["email"]
+    password = request.form["password"]
+
+    cursor.execute(
+        "SELECT id, password FROM users WHERE email=%s",
+        (email,)
+    )
+
+    user = cursor.fetchone()
+
+    if user and check_password_hash(user[1], password):
+        session["user_id"] = user[0]
+        return redirect("/home")
+    elif user and user[1] == password:
+        # Fallback for plain-text users already in DB
+        session["user_id"] = user[0]
+        return redirect("/home")
+    else:
+        return "Invalid Login"
+
+
+@app.route("/home")
+def home():
+    return render_template("index.html")
+
+
+@app.route("/check", methods=["POST"])
+def check():
+
+    url = request.form["url"]
+    
+    reachable = True
+    try:
+        # Make a quick HEAD/GET request to check if it's reachable. Some sites block HEAD, so we use GET with timeout.
+        req = requests.get(url, timeout=3)
+        if req.status_code >= 400:
+            reachable = False
+    except Exception:
+        reachable = False
+
+    features, details = extract_features(url)
+    result = model.predict([features])[0]
+
+    if result == 1:
+        prediction = "⚠️ Phishing Website"
+    else:
+        prediction = "✅ Safe Website"
+
+    user_id = session["user_id"]    
+
+    cursor.execute("INSERT INTO scan_history(user_id,url,result) VALUES(%s,%s,%s)",
+        (user_id,url,prediction)
+    )    
+    conn.commit()
+
+    return render_template("result.html",prediction=prediction,url=url,reachable=reachable,details=details)
+
+
+@app.route("/history")
+def history():
+
+    user_id = session["user_id"]
+
+    cursor.execute(
+        "SELECT url,result,scan_time FROM scan_history WHERE user_id=%s ORDER BY scan_time DESC",
+        (user_id,)
+    )
+
+    data = cursor.fetchall()
+
+    return render_template("history.html",data=data)
+
+@app.route("/logout")
+def logout():
+    session.pop("user_id", None)
+    return redirect("/")
+
+@app.route("/download_history")
+def download_history():
+    if "user_id" not in session:
+        return redirect("/")
+        
+    user_id = session["user_id"]
+    cursor.execute(
+        "SELECT url, result, scan_time FROM scan_history WHERE user_id=%s ORDER BY scan_time DESC",
+        (user_id,)
+    )
+    data = cursor.fetchall()
+
+    def generate():
+        data_io = io.StringIO()
+        writer = csv.writer(data_io)
+        writer.writerow(["URL", "Result", "Scan Time"])
+        for row in data:
+            writer.writerow(row)
+            yield data_io.getvalue()
+            data_io.seek(0)
+            data_io.truncate(0)
+
+    return Response(generate(), mimetype="text/csv", headers={"Content-Disposition": "attachment; filename=scan_history.csv"})
+
+if __name__ == "__main__":
+    app.run(debug=True)

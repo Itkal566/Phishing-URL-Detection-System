@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Phishing URL Detection</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<header>
+<div>SecureGuard</div>
+<div class="nav-links">
+  <a href="/history">History</a>
+  <a href="/logout">Logout</a>
+</div>
+</header>
+
+<section class="hero">
+
+<h1>Phishing URL Detection System</h1>
+<p>Smart AI-based Security Scanner for Suspicious Links</p>
+
+<div class="main-card">
+
+<form action="/check" method="POST">
+
+<div class="input-group">
+
+<input type="text" name="url" placeholder="Enter URL here..." required>
+
+<button type="submit">Scan</button>
+
+</div>
+
+</form>
+<br>
+<a href="/history">
+<button>View Scan History</button>
+</a>
+
+</div>
+
+
+
+<div class="features">
+
+<div class="feature">
+<h3>⚡ Fast Scan</h3>
+<p>Instant detection in seconds.</p>
+</div>
+
+<div class="feature">
+<h3>🛡 AI Protection</h3>
+<p>Smart phishing pattern detection.</p>
+</div>
+
+<div class="feature">
+<h3>🔒 Secure</h3>
+<p>Prevents malicious access.</p>
+</div>
+
+</div>
+
+</section>
+
+<footer>
+© 2026 Phishing URL Detection Project | Developed by Pratik
+</footer>
+
+</body>
+</html>
