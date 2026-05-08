@@ -2,7 +2,7 @@
 <html>
 <head>
 
-<title>Phishing URL Detection</title>
+<title>Sign Up</title>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
@@ -13,63 +13,38 @@
 <body>
 
 <header>
-<div>SecureGuard</div>
-<div class="nav-links">
-  <a href="/history">History</a>
-  <a href="/logout">Logout</a>
-</div>
+SecureGuard
 </header>
 
-<section class="hero">
+<div class="auth-container">
 
-<h1>Phishing URL Detection System</h1>
-<p>Smart AI-based Security Scanner for Suspicious Links</p>
+<div class="auth-card">
 
-<div class="main-card">
+<h2>Create Account</h2>
 
-<form action="/check" method="POST">
+<form action="/register" method="POST">
 
-<div class="input-group">
+<input type="text" name="username" placeholder="Username" required>
 
-<input type="text" name="url" placeholder="Enter URL here..." required>
+<input type="email" name="email" placeholder="Email" required>
 
-<button type="submit">Scan</button>
+<input type="password" name="password" placeholder="Password" required>
 
-</div>
+<button type="submit">Sign Up</button>
 
 </form>
-<br>
-<a href="/history">
-<button>View Scan History</button>
-</a>
 
-</div>
-
-
-
-<div class="features">
-
-<div class="feature">
-<h3>⚡ Fast Scan</h3>
-<p>Instant detection in seconds.</p>
-</div>
-
-<div class="feature">
-<h3>🛡 AI Protection</h3>
-<p>Smart phishing pattern detection.</p>
-</div>
-
-<div class="feature">
-<h3>🔒 Secure</h3>
-<p>Prevents malicious access.</p>
+<div class="auth-link">
+Already have an account?
+<a href="/">Login</a>
 </div>
 
 </div>
 
-</section>
+</div>
 
 <footer>
-© 2026 Phishing URL Detection Project | Developed by Pratik
+© 2026 Phishing URL Detection Project
 </footer>
 
 </body>
